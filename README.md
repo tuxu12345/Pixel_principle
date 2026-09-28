@@ -4,7 +4,9 @@
 
 ## 在线预览
 
-启用本仓库的 GitHub Pages 后，可通过 `https://tutan123.github.io/Pixel_principle/` 查看互动 Demo。`main` 分支有新提交时，GitHub Actions 会自动构建并更新网页。第一次启用时，在仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。
+https://tuxu12345.github.io/Pixel_principle/
+
+`main` 分支有新提交时，GitHub Actions 会自动构建并更新网页。
 
 ## 直接打开 Demo
 
