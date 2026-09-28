@@ -1,0 +1,114 @@
+{
+  "initial": {
+    "screenCenters": [
+      -242,
+      0,
+      242
+    ],
+    "dimensions": [
+      240,
+      120,
+      12
+    ],
+    "railLength": 1120,
+    "pixels": [
+      144,
+      24
+    ],
+    "view": "overall",
+    "pattern": "dog",
+    "action": "light",
+    "camera": [
+      770.0000000000002,
+      380.00000000000017,
+      1470.0000000000002
+    ]
+  },
+  "checks": [
+    {
+      "name": "view section",
+      "pass": true
+    },
+    {
+      "name": "view close",
+      "pass": true
+    },
+    {
+      "name": "view overall",
+      "pass": true
+    },
+    {
+      "name": "pattern heart",
+      "pass": true
+    },
+    {
+      "name": "pattern wave",
+      "pass": true
+    },
+    {
+      "name": "pattern text",
+      "pass": true
+    },
+    {
+      "name": "pattern dog",
+      "pass": true
+    },
+    {
+      "name": "text input",
+      "pass": true
+    },
+    {
+      "name": "insertion from right and assembled positions",
+      "pass": true
+    },
+    {
+      "name": "extraction",
+      "pass": true
+    },
+    {
+      "name": "join",
+      "pass": true
+    },
+    {
+      "name": "resume",
+      "pass": true
+    },
+    {
+      "name": "pause",
+      "pass": true
+    },
+    {
+      "name": "brightness",
+      "pass": true
+    },
+    {
+      "name": "render dialog",
+      "pass": true
+    },
+    {
+      "name": "orbit drag",
+      "pass": true
+    },
+    {
+      "name": "wheel zoom",
+      "pass": true
+    },
+    {
+      "name": "pan",
+      "pass": true
+    },
+    {
+      "name": "mobile no overflow",
+      "pass": true
+    },
+    {
+      "name": "offline 3D initialization",
+      "pass": true
+    },
+    {
+      "name": "no browser runtime errors",
+      "pass": true
+    }
+  ],
+  "errors": []
+}

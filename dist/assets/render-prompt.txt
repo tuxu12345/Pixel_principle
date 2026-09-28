@@ -1,0 +1,12 @@
+Use case: product-mockup
+Asset type: photorealistic industrial design concept rendering, wide 16:9 composition.
+Primary request: Three modular pixel LED displays mounted side-by-side inside a car, along the bottom edge of a side window, on one continuous lower aluminum sliding C rail.
+Subject geometry: Exactly THREE equal black anodized aluminum modules. Each physical module is precisely 240 mm wide x 120 mm high x 12 mm deep, so each front is a landscape 2:1 rectangle and the full three-panel strip is approximately 6:1. Thin black bezels and subtle vertical seams between all three modules. All modules aligned at the same height on the same horizontal continuous rail. Show slight depth from a close three-quarter interior view, but preserve visibly wide 2:1 module faces.
+Screen content: Visible individual emissive LED dots on glossy black glass. A clear, charming warm amber pixel-art dog silhouette distributed across the dot-matrix display, with a few small amber and cyan wave and heart pixels on neighboring panels. Crisp geometric pixel clusters and regular dot grid, realistic optical bloom that does not obscure individual dots.
+Scene/backdrop: Dark automotive cabin at night, looking from inside toward the side window. Defocused city lights outside the glass, restrained teal ambient light in the cabin. Padded black door ledge directly below the product.
+Mechanical details: Continuous slim aluminum lower C-channel sliding rail clearly visible beneath all screens, realistic recessed sliding track, tidy end stops and plausible compact padded mounting feet seated on the door ledge. Show the modules engaging the rail. No bulky arms or floating mounts.
+Style/medium: Premium industrial design photoreal render, product photography quality, realistic black anodized brushed metal, fine microtexture, black glass reflections, tactile padded upholstery, cinematic but readable product illumination.
+Composition/framing: Product dominates the image in a close three-quarter view, entire three-module assembly and continuous lower rail visible with breathing room around it. Moderate perspective with camera aimed almost square to the screen faces; softly blurred background, sharp product. Wide landscape image.
+Constraints: Exactly three modules; equal-sized landscape 2:1 screen housings; realistic continuous rail below; amber pixel dog; individual visible LED dots. No people, no logos, no lettering, no dimension labels, no UI overlays, no watermark.
+
+Generation tool: built-in image_gen.imagegen

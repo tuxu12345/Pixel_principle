@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101316"><title>PIXEL / RAIL — 车窗点阵屏概念</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header><a class="brand" href="#" aria-label="Pixel Rail 首页"><span class="brandmark">▦</span> PIXEL <i>/</i> RAIL</a><span class="project-label">车窗点阵屏 · 概念实验室</span><div class="header-end"><span class="edition">DESIGN STUDY — 01</span><a class="download" href="assets/pixel-rail.3dm" download>↓ Rhino 模型</a></div></header>
+<main>
+<section class="workspace" aria-label="3D 模型工作区">
+<div class="viewport-top"><div><span class="eyebrow">MODULAR WINDOW DISPLAY</span><h1>让车窗，有一点灵感。</h1><p>240 × 120 mm · 滑轨式像素显示模组</p></div><span class="live-tag"><b></b> 实时 3D</span></div>
+<div id="stage" role="img" aria-label="可旋转、缩放和平移的车窗点阵屏 3D 模型"><div id="loading">正在构建 3D 场景…</div></div>
+<nav class="views" aria-label="查看角度"><button data-view="overall" class="active">01 <span>整体外观</span></button><button data-view="section">02 <span>滑槽剖面</span></button><button data-view="close">03 <span>点亮特写</span></button></nav>
+<div class="view-note" id="view-note"><b>三屏，一幅画面。</b><span>2 mm 物理接缝 · 共用 144 × 24 像素画布</span></div>
+<div class="section-legend" hidden><span><i style="background:#eaa75d"></i>铝合金 C 轨</span><span><i style="background:#72d0cf"></i>T 形滑块</span><span>顶部开口 14 mm / 滑块宽 20 mm</span></div>
+<div class="stage-bottom"><span>左键旋转 <em>·</em> 滚轮缩放 <em>·</em> 右键平移</span><div><button id="reset" title="重置视角">↺ 重置</button><button id="capture" title="导出当前模型截图">↗ 导出视图</button></div></div>
+<div class="spec-strip"><div><span>单屏尺寸</span><strong>240 × 120 <small>mm</small></strong></div><div><span>屏幕联动</span><strong>3 <small>块模组</small></strong></div><div><span>单屏点阵</span><strong>48 × 24 <small>pixels</small></strong></div><div><span>设计阶段</span><strong class="concept">概念验证 <small>V 1.0</small></strong></div></div>
+</section>
+<aside>
+<div class="panel-heading"><span>交互控制</span><span class="tiny">CONTROL PANEL</span></div>
+<section class="control-section"><div class="section-title"><h2>动作演示</h2><span>01—03</span></div><div class="action-list">
+<button class="action active" data-action="light"><span class="action-icon">☼</span><span><b>点亮屏幕</b><small>像素小狗，在车窗散步</small></span><span class="play-symbol">↗</span></button>
+<button class="action" data-action="slide"><span class="action-icon">⇆</span><span><b>滑入 / 滑出</b><small>沿轨道装入与取出模组</small></span><span class="play-symbol">↗</span></button>
+<button class="action" data-action="join"><span class="action-icon">▥</span><span><b>多屏联动</b><small>从独立模组到连续画面</small></span><span class="play-symbol">↗</span></button></div>
+<div class="transport"><button id="pause" aria-label="暂停动画">Ⅱ</button><input id="timeline" type="range" min="0" max="1000" value="0" aria-label="动画进度"><span id="time-label">00:00</span></div><p class="status" id="status" aria-live="polite">点阵已点亮 · 小狗动画循环播放</p></section>
+<section class="control-section"><div class="section-title"><h2>像素内容</h2><span>144 × 24</span></div><div class="patterns"><button data-pattern="dog" class="active"><span>🐕</span>小狗</button><button data-pattern="heart"><span>♡</span>爱心</button><button data-pattern="wave"><span>≈</span>波浪</button><button data-pattern="text"><span>Aa</span>文字</button></div><label class="text-input" hidden>滚动文字<input id="message" maxlength="32" value="HELLO, PIXEL!" aria-label="滚动文字内容"></label><div class="brightness"><label for="brightness">屏幕亮度</label><output id="brightness-value">80%</output></div><input id="brightness" type="range" min="10" max="100" value="80" aria-label="屏幕亮度"></section>
+<section class="control-section atmosphere"><div class="section-title"><h2>夜间氛围</h2><span>CONCEPT RENDER</span></div><button id="open-render" aria-label="查看夜间氛围效果图"><img src="assets/concept.png" alt="夜晚汽车侧窗上三块点阵屏发出琥珀色光，屏幕呈现像素小狗"><span>查看效果图 ↗</span></button><p>AI 概念氛围图 · 结构以 3D 模型为准</p></section>
+<div class="panel-footer"><span>单位：mm</span><a href="assets/README.txt" target="_blank">设计说明 ↗</a></div>
+</aside>
+</main><footer><span>PIXEL / RAIL <em>—</em> 可拼接的移动像素画布</span><span>CONCEPT DESIGN · 2026</span></footer>
+<dialog id="render-dialog"><button id="close-render" aria-label="关闭效果图">×</button><img src="assets/concept.png" alt="车窗点阵屏夜间氛围概念效果图"><div><span>夜间氛围 / AI 概念效果图</span><a href="assets/concept.png" download>下载原图 ↓</a></div></dialog>
+<script src="app.js"></script></body></html>

@@ -1,0 +1,1 @@
+{"name":"pixel-rail-concept","private":true,"version":"1.0.0","type":"module","scripts":{"build":"node scripts/build.mjs"},"dependencies":{"three":"0.180.0"},"devDependencies":{"esbuild":"0.25.10","@playwright/test":"1.55.1"}}
