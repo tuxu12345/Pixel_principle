@@ -1,6 +1,8 @@
 import {build} from 'esbuild';
 import {readFile,writeFile,copyFile} from 'node:fs/promises';
 await build({entryPoints:['src/app.js'],bundle:true,minify:true,outfile:'dist/app.js',format:'iife',target:'es2020',legalComments:'eof'});
+// Remove whitespace-only lines emitted inside dependency shader strings.
+const bundle=await readFile('dist/app.js','utf8');await writeFile('dist/app.js',bundle.replace(/^[\t ]+$/gm,''));
 await copyFile('src/style.css','dist/style.css');
 await copyFile('src/index.html','dist/index.html');
 const html=await readFile('src/index.html','utf8'),css=await readFile('src/style.css','utf8'),js=await readFile('dist/app.js','utf8');

@@ -5,6 +5,26 @@
       0,
       242
     ],
+    "screenHeights": [
+      16,
+      16,
+      16
+    ],
+    "carriageCenters": [
+      -242,
+      0,
+      242
+    ],
+    "pinTravel": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "sectionLift": 0,
+    "sectionPinTravel": 0,
     "dimensions": [
       240,
       120,
@@ -66,6 +86,42 @@
       "pass": true
     },
     {
+      "name": "detach opens section",
+      "pass": true
+    },
+    {
+      "name": "two locked pins per screen",
+      "pass": true
+    },
+    {
+      "name": "pins fully withdrawn before lift",
+      "pass": true
+    },
+    {
+      "name": "screens detach while carriages stay in rail",
+      "pass": true
+    },
+    {
+      "name": "seat before reinserting pins",
+      "pass": true
+    },
+    {
+      "name": "detach loop re-locks",
+      "pass": true
+    },
+    {
+      "name": "no lifting through a locked pin",
+      "pass": true
+    },
+    {
+      "name": "scrub immediately seats screen",
+      "pass": true
+    },
+    {
+      "name": "switch action resets connectors",
+      "pass": true
+    },
+    {
       "name": "join",
       "pass": true
     },
@@ -102,7 +158,15 @@
       "pass": true
     },
     {
+      "name": "mobile detach no overflow",
+      "pass": true
+    },
+    {
       "name": "offline 3D initialization",
+      "pass": true
+    },
+    {
+      "name": "offline detachable connectors",
       "pass": true
     },
     {

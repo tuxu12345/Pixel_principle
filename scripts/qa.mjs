@@ -13,6 +13,27 @@ for(const pattern of ['heart','wave','text','dog']){await page.locator(`[data-pa
 await page.locator('[data-pattern="text"]').click();await page.locator('#message').fill('你好 PIXEL');check('text input',await page.evaluate(()=>window.pixelRail.state.message==='你好 PIXEL'));await page.locator('[data-pattern="dog"]').click();
 await page.locator('[data-action="slide"]').click();await page.evaluate(()=>window.pixelRail.renderAt(0));let a=await page.evaluate(()=>window.pixelRail.getMetrics().screenCenters);await page.evaluate(()=>window.pixelRail.renderAt(5));let b=await page.evaluate(()=>window.pixelRail.getMetrics().screenCenters);check('insertion from right and assembled positions',a[0]>b[0]+800&&b.every((x,i)=>x===(i-1)*242));
 await page.evaluate(()=>window.pixelRail.renderAt(11.9));let c=await page.evaluate(()=>window.pixelRail.getMetrics().screenCenters);check('extraction',c[2]>b[2]+500);
+await page.locator('[data-action="detach"]').click();await page.waitForTimeout(1000);
+check('detach opens section',await page.evaluate(()=>window.pixelRail.state.view==='section'));
+await page.evaluate(()=>window.pixelRail.renderAt(0));let locked=await page.evaluate(()=>window.pixelRail.getMetrics());
+check('two locked pins per screen',locked.pinTravel.length===6&&locked.pinTravel.every(z=>z===0));
+await page.evaluate(()=>window.pixelRail.renderAt(2));let unlocked=await page.evaluate(()=>window.pixelRail.getMetrics());
+check('pins fully withdrawn before lift',unlocked.pinTravel.every(z=>z===30)&&unlocked.screenHeights.every(y=>y===16)&&unlocked.sectionLift===0);
+await page.evaluate(()=>window.pixelRail.renderAt(5));let detached=await page.evaluate(()=>window.pixelRail.getMetrics());
+check('screens detach while carriages stay in rail',detached.screenHeights.every(y=>y===111)&&detached.carriageCenters.every((x,i)=>x===(i-1)*242)&&detached.sectionLift===65&&detached.sectionPinTravel===30);
+await page.screenshot({path:'dist/assets/demo-detach.png',fullPage:true});
+await page.evaluate(()=>{window.pixelRail.setView('overall');window.pixelRail.setCamera('overall',true);window.pixelRail.renderAt(5);});await page.waitForTimeout(200);
+await page.screenshot({path:'dist/assets/demo-detach-overall.png',fullPage:true});
+await page.evaluate(()=>window.pixelRail.renderAt(9));let seated=await page.evaluate(()=>window.pixelRail.getMetrics());
+check('seat before reinserting pins',seated.screenHeights.every(y=>y===16)&&seated.pinTravel.every(z=>z===30));
+await page.evaluate(()=>window.pixelRail.renderAt(11.5));let relocked=await page.evaluate(()=>window.pixelRail.getMetrics());
+check('detach loop re-locks',relocked.screenHeights.every(y=>y===16)&&relocked.pinTravel.every(z=>z===0));
+// Verify retention order across the whole cycle, including intermediate frames.
+check('no lifting through a locked pin',await page.evaluate(()=>{for(let t=0;t<12;t+=.1){window.pixelRail.renderAt(t);const m=window.pixelRail.getMetrics();if(m.screenHeights[0]>16.001&&m.pinTravel.some(z=>z<29.999))return false;}return true;}));
+await page.evaluate(()=>window.pixelRail.renderAt(5));await page.locator('#timeline').fill('750');
+check('scrub immediately seats screen',await page.evaluate(()=>window.pixelRail.getMetrics().screenHeights.every(y=>y===16)));
+await page.locator('[data-action="light"]').click();
+check('switch action resets connectors',await page.evaluate(()=>{const m=window.pixelRail.getMetrics();return m.screenHeights.every(y=>y===16)&&m.pinTravel.every(z=>z===0)&&m.sectionLift===0;}));
 await page.locator('[data-action="join"]').click();await page.evaluate(()=>window.pixelRail.renderAt(0));a=await page.evaluate(()=>window.pixelRail.getMetrics().screenCenters);await page.evaluate(()=>window.pixelRail.renderAt(6));b=await page.evaluate(()=>window.pixelRail.getMetrics().screenCenters);check('join',a[2]-a[0]>b[2]-b[0]&&b[2]-b[0]===484);
 await page.locator('[data-action="light"]').click();await page.evaluate(()=>window.pixelRail.renderAt(2));await page.locator('#pause').click();check('resume',await page.evaluate(()=>!window.pixelRail.state.paused));await page.locator('#pause').click();check('pause',await page.evaluate(()=>window.pixelRail.state.paused));
 await page.locator('#brightness').fill('40');check('brightness',await page.evaluate(()=>window.pixelRail.state.brightness===.4));await page.locator('#brightness').fill('80');
@@ -24,5 +45,7 @@ a=await page.evaluate(()=>window.pixelRail.controls.target.toArray());await page
 await page.locator('#reset').click();await page.waitForTimeout(1000);await page.evaluate(()=>window.pixelRail.renderAt(2));
 for(const v of ['overall','close','section']){await page.evaluate(v=>{window.pixelRail.setView(v);window.pixelRail.setCamera(v,true);window.pixelRail.renderAt(2);},v);await page.waitForTimeout(200);const data=await page.evaluate(()=>window.pixelRail.renderer.domElement.toDataURL('image/png'));await fs.writeFile(`dist/assets/model-${v}.png`,Buffer.from(data.split(',')[1],'base64'));}
 await page.setViewportSize({width:390,height:844});await page.evaluate(()=>{window.pixelRail.setView('overall');window.pixelRail.setCamera('overall',true);});await page.waitForTimeout(1000);check('mobile no overflow',await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth));await page.screenshot({path:'dist/assets/demo-mobile.png',fullPage:true});
+await page.locator('[data-action="detach"]').click();await page.waitForTimeout(1000);await page.evaluate(()=>window.pixelRail.renderAt(5));check('mobile detach no overflow',await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth));await page.screenshot({path:'dist/assets/demo-detach-mobile.png',fullPage:true});
 await page.goto('file:///'+process.cwd().replaceAll('\\','/')+'/dist/pixel-rail-offline.html');await page.waitForFunction(()=>!!window.pixelRail);check('offline 3D initialization',await page.evaluate(()=>!!window.pixelRail.renderer.getContext()));
+await page.locator('[data-action="detach"]').click();await page.evaluate(()=>window.pixelRail.renderAt(5));check('offline detachable connectors',await page.evaluate(()=>window.pixelRail.getMetrics().pinTravel.every(z=>z===30)&&window.pixelRail.getMetrics().sectionLift===65));
 check('no browser runtime errors',errors.length===0);report.errors=errors;await fs.writeFile('dist/assets/browser-validation.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report));await browser.close();

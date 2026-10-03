@@ -26,6 +26,7 @@ rails=layer('02 滑槽轨道',(158,175,185))
 bases=layer('03 车侧安装基座',(85,109,120))
 env=layer('04 车窗与门板_参考环境',(66,86,98),visible=False)
 anno=layer('05 尺寸与说明',(195,215,223))
+connectors=layer('06 可拆卸连接件',(101,205,204))
 railbody=layer('C形连续轨道_1120mm',(168,184,191),rails)
 railend=layer('左端止挡_右端装入',(76,94,104),rails)
 basebody=layer('可调安装座_概念',(80,109,120),bases)
@@ -40,6 +41,28 @@ def addbox(name,li,w,h,d,x,y,z,group=None):
     b=r.Brep.CreateFromBoundingBox(r.BoundingBox(x-w/2,y-h/2,z-d/2,x+w/2,y+h/2,z+d/2))
     a=attrs(name,li,group);a.SetUserString('Nominal dimensions mm',f'{w} x {h} x {d}')
     doc.Objects.AddBrep(b,a)
+
+def pierced(name,li,w,h,d,x,y,z,gr):
+    pts=[(-w/2,-h/2),(w/2,-h/2),(w/2,h/2),(-w/2,h/2),(-w/2,-h/2)]
+    curve=r.PolylineCurve([r.Point3d(xx,yy,0) for xx,yy in pts])
+    ex=r.Extrusion()
+    assert ex.SetPathAndUp(r.Point3d(x,y,z-d/2),r.Point3d(x,y,z+d/2),r.Vector3d(0,1,0))
+    assert ex.SetOuterProfile(curve,True)
+    hole=r.Circle(2.3).ToNurbsCurve()
+    hole.Reverse()
+    assert ex and ex.AddInnerProfile(hole)
+    doc.Objects.AddExtrusion(ex,attrs(name,li,gr))
+
+def lockpin(x,li,gr,name):
+    circle=r.Circle(r.Point3d(x,-49.5,-10),2)
+    doc.Objects.AddBrep(r.Cylinder(circle,20).ToBrep(True,True),attrs(name+' shaft diameter 4 mm',li,gr))
+    addbox(name+' pull head',li,7,7,3,x,-49.5,11.5,gr)
+    ring=r.Extrusion()
+    assert ring.SetPathAndUp(r.Point3d(x,-42,11.9),r.Point3d(x,-42,14.1),r.Vector3d(0,1,0))
+    assert ring.SetOuterProfile(r.Circle(6.6).ToNurbsCurve(),True)
+    inner=r.Circle(4.4).ToNurbsCurve();inner.Reverse()
+    assert ring.AddInnerProfile(inner)
+    doc.Objects.AddExtrusion(ring,attrs(name+' pull ring',li,gr))
 
 def group(name):
     g=r.Group();g.Name=name;doc.Groups.Add(g);return len(doc.Groups)-1
@@ -63,7 +86,7 @@ def ledmesh(cx,mode):
             global_x=int((cx+242)/242)*48+x
             if pixel_kind(global_x,y)!=mode:continue
             # Separate circular LED lenses, grouped into one editable mesh per module.
-            xx=cx+(x-23.5)*4.75;yy=(11.5-y)*4.75;rad=1.1;n=10
+            xx=cx+(x-23.5)*4.75;yy=16+(11.5-y)*4.75;rad=1.1;n=10
             b=len(mesh.Vertices)
             for z in (6.5,6.95):
                 for k in range(n):
@@ -81,21 +104,31 @@ for i,cx in enumerate((-242,0,242),1):
     dots=layer('LED透镜_未点亮',(36,49,55),root)
     amber=layer('LED透镜_小狗琥珀色',(246,171,91),root)
     cyan=layer('LED透镜_青色波浪',(90,193,198),root)
-    shoes=layer('T形滑块',(91,185,183),root)
+    connection=layer(f'模组_{i:02}_快拆组件',(101,205,204),connectors)
+    shoes=layer('T形滑块与快拆座',(101,205,204),connection)
+    tongues=layer('屏幕插舌_孔径4.6mm',(179,194,199),connection)
+    pins=layer('可拔锁销与拉环',(244,186,118),connection)
     gr=group(f'Module {i} 240x120 mm')
     # Back shell + four perimeter strips form an actual hollow frame rather than an overlapping solid slab.
-    addbox(f'M{i} rear shell 240x120',case,240,120,2,cx,0,-5,gr)
-    addbox(f'M{i} frame left',case,5,120,10,cx-117.5,0,1,gr)
-    addbox(f'M{i} frame right',case,5,120,10,cx+117.5,0,1,gr)
-    addbox(f'M{i} frame top',case,230,2.5,10,cx,58.75,1,gr)
-    addbox(f'M{i} frame bottom',case,230,2.5,10,cx,-58.75,1,gr)
-    addbox(f'M{i} black front panel',front,230,115,1,cx,0,5.5,gr)
-    addbox(f'M{i} display PCB',front,226,110,1.6,cx,0,2.4,gr)
+    addbox(f'M{i} rear shell 240x120',case,240,120,2,cx,16,-5,gr)
+    addbox(f'M{i} frame left',case,5,120,10,cx-117.5,16,1,gr)
+    addbox(f'M{i} frame right',case,5,120,10,cx+117.5,16,1,gr)
+    addbox(f'M{i} frame top',case,230,2.5,10,cx,74.75,1,gr)
+    addbox(f'M{i} frame bottom',case,230,2.5,10,cx,-42.75,1,gr)
+    addbox(f'M{i} black front panel',front,230,115,1,cx,16,5.5,gr)
+    addbox(f'M{i} display PCB',front,226,110,1.6,cx,16,2.4,gr)
     for mode,li in enumerate((dots,amber,cyan)):
         doc.Objects.AddMesh(ledmesh(cx,mode),attrs(f'M{i} LED lenses P4.75 palette {mode}',li,gr))
     for j,sx in enumerate((-76,76),1):
-        addbox(f'M{i} shoe {j} retained flange',shoes,26,5,20,cx+sx,-70,0,gr)
-        addbox(f'M{i} shoe {j} neck',shoes,16,10,10,cx+sx,-62.5,0,gr)
+        x=cx+sx;cart=group(f'Module {i} retained carriage {j}');pin=group(f'Module {i} removable pin {j}')
+        addbox(f'M{i} shoe {j} retained flange',shoes,26,5,20,x,-70,0,cart)
+        addbox(f'M{i} shoe {j} neck',shoes,16,13,10,x,-61.5,0,cart)
+        addbox(f'M{i} receiver {j} floor',shoes,24,3,14,x,-56.5,0,cart)
+        for side in (-1,1):
+            addbox(f'M{i} receiver {j} side {side}',shoes,5,11,14,x+side*9.5,-49.5,0,cart)
+            pierced(f'M{i} receiver {j} cheek {side}',shoes,14,11,3,x,-49.5,side*5.5,cart)
+        pierced(f'M{i} detachable screen tongue {j}',tongues,14,11,6,x,-49.5,0,gr)
+        lockpin(x,pins,pin,f'M{i} lock pin {j}')
 
 # Closed extrusion of a single C cross-section, not five coincident bars.
 # Draw the cross-section in XY: X maps to Z, Y remains Y; extrude along local Z then rotate to world X.
@@ -118,10 +151,11 @@ addbox('Generic window - illustrative only',env,1010,380,4,0,110,-52)
 
 def note(text,p):doc.Objects.AddTextDot(text,r.Point3d(*p),attrs(text,anno))
 def line(a,b):doc.Objects.AddLine(r.Point3d(*a),r.Point3d(*b),attrs('Dimension guide',anno))
-line((-362,85,0),(-122,85,0));line((-362,62,0),(-362,94,0));line((-122,62,0),(-122,94,0));note('240 mm',(-242,95,0))
-line((-390,-60,0),(-390,60,0));note('120 mm',(-411,0,0))
+line((-362,101,0),(-122,101,0));line((-362,78,0),(-362,110,0));line((-122,78,0),(-122,110,0));note('240 mm',(-242,111,0))
+line((-390,-44,0),(-390,76,0));note('120 mm',(-411,16,0))
 line((-560,-148,0),(560,-148,0));note('C rail 1120 mm',(0,-155,0))
 note('3 x 240x120 mm / 2 mm physical gaps / 144x24 logical pixels',(0,140,0))
+note('QUICK RELEASE: pull 2 pins toward cabin (+Z), then lift screen (+Y); T shoes stay in rail',(0,175,0))
 note('CONCEPT / nominal mm / vehicle interface to be engineered',(0,-198,0))
 
 view=r.ViewInfo();view.Name='Pixel Rail - assembly';view.Viewport=r.ViewportInfo.DefaultPerspective()
@@ -142,6 +176,9 @@ for ob in read.Objects:
         envelopes.append(dims)
 assert not invalid,invalid
 assert len(envelopes)==3
-report={'file':str(path),'rhino_version':7,'units':'millimeters','layers':len(read.Layers),'objects':len(read.Objects),'valid_geometry':True,'module_envelopes_mm':[[240,120,12]]*3,'physical_gap_mm':2,'rail_length_mm':1120,'rail_cross_section_mm':[18,30],'top_opening_mm':14,'shoe_flange_depth_mm':20,'notes':'LED lenses protrude 0.95 mm beyond nominal housing front. Rhino CAD is a concept assembly.'}
+names=[ob.Attributes.Name for ob in read.Objects]
+assert sum('detachable screen tongue' in n for n in names)==6
+assert sum('shaft diameter 4 mm' in n for n in names)==6
+report={'file':str(path),'rhino_version':7,'units':'millimeters','layers':len(read.Layers),'objects':len(read.Objects),'valid_geometry':True,'module_envelopes_mm':[[240,120,12]]*3,'physical_gap_mm':2,'rail_length_mm':1120,'rail_cross_section_mm':[18,30],'top_opening_mm':14,'shoe_flange_depth_mm':20,'connectors_per_screen':2,'connector_count':6,'pin_diameter_mm':4,'connection_hole_diameter_mm':4.6,'screen_center_y_mm':16,'notes':'Quick-release tongues, receivers and removable pins are separately editable. LED lenses protrude 0.95 mm beyond nominal housing front. Concept assembly.'}
 (OUT/'model-validation.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf8')
 print(json.dumps(report,ensure_ascii=False))

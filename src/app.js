@@ -48,13 +48,34 @@ function makeRail(parent,length,material=railMat){
 makeRail(product,1120);
 [-474,0,474].forEach(x=>{box(product,86,10,65,x,-83,-12,baseMat,3);box(product,80,4,61,x,-90,-12,rubber,1);box(product,70,37,8,x,-105,-40,baseMat,2);for(const off of [-28,28]){const screw=new THREE.Mesh(new THREE.CylinderGeometry(3,3,3,16),silver);screw.position.set(x+off,-77,-29);product.add(screw);}});
 box(product,7,19,32,-563.5,-69,0,black,2); // fixed stop at the left end; right end is the insertion mouth
-const screenGroups=[],screenMaps=[],screenLights=[];
+const screenGroups=[],screenMaps=[],screenLights=[],carriages=[],lockPins=[];
+const connectorMat=mat(0x65cdcc,.55,.3),pinMat=mat(0xf4ba76,.7,.25);
+// A screen tongue drops into a separate receiver; a Z-axis pin passes through both.
+function piercedBlock(parent,w,h,d,x,y,z,material){
+ const s=new THREE.Shape();s.moveTo(-w/2,-h/2);s.lineTo(w/2,-h/2);s.lineTo(w/2,h/2);s.lineTo(-w/2,h/2);s.closePath();
+ const hole=new THREE.Path();hole.absarc(0,0,2.3,0,Math.PI*2,true);s.holes.push(hole);
+ const mesh=new THREE.Mesh(new THREE.ExtrudeGeometry(s,{depth:d,bevelEnabled:false,curveSegments:24}),material);mesh.position.set(x,y,z-d/2);parent.add(mesh);return mesh;
+}
+function makeConnector(parent,x,width=26){
+ const g=new THREE.Group();g.position.x=x;parent.add(g);
+ box(g,width,5,20,0,-70,0,connectorMat,1);box(g,16,13,10,0,-61.5,0,connectorMat,.5);
+ box(g,24,3,14,0,-56.5,0,connectorMat,.4);
+ [-9.5,9.5].forEach(sx=>box(g,5,11,14,sx,-49.5,0,connectorMat,.4));
+ [-5.5,5.5].forEach(z=>piercedBlock(g,14,11,3,0,-49.5,z,connectorMat));
+ const pin=new THREE.Group();g.add(pin);pin.position.y=-49.5;
+ const shaft=new THREE.Mesh(new THREE.CylinderGeometry(2,2,20,24),silver);shaft.rotation.x=Math.PI/2;pin.add(shaft);
+ box(pin,7,7,3,0,0,11.5,pinMat,1);
+ const ring=new THREE.Mesh(new THREE.TorusGeometry(5.5,1.1,8,32),pinMat);ring.position.set(0,7.5,13);pin.add(ring);
+ return {g,pin};
+}
 function makeScreen(x,index){const g=new THREE.Group();g.position.x=x;product.add(g);screenGroups.push(g);
+ g.position.y=16;
+ const carriage=new THREE.Group();carriage.position.x=x;product.add(carriage);carriages.push(carriage);
  box(g,240,120,12,0,0,0,black,2);box(g,230,115,1,0,0,6.2,glassMat,1);
  const canvas=document.createElement('canvas');canvas.width=768;canvas.height=384;const tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;tex.minFilter=THREE.LinearMipmapLinearFilter;tex.anisotropy=renderer.capabilities.getMaxAnisotropy();screenMaps.push({canvas,tex,ctx:canvas.getContext('2d')});
  const ledmat=new THREE.MeshStandardMaterial({map:tex,emissiveMap:tex,emissive:0xffffff,emissiveIntensity:1.8,roughness:.4,metalness:.05});
  const face=new THREE.Mesh(new THREE.PlaneGeometry(228,114),ledmat);face.position.z=6.8;g.add(face);screenLights.push(ledmat);
- [-76,76].forEach(sx=>{box(g,26,5,20,sx,-70,0,baseMat,1);box(g,16,10,10,sx,-62.5,0,baseMat,1);});
+ [-76,76].forEach(sx=>{piercedBlock(g,14,11,6,sx,-65.5,0,silver);const c=makeConnector(carriage,sx);lockPins.push(c.pin);});
  [-112,112].forEach(sx=>[-52,52].forEach(sy=>{const screw=new THREE.Mesh(new THREE.CylinderGeometry(1.25,1.25,.5,12),silver);screw.rotation.x=Math.PI/2;screw.position.set(sx,sy,6.25);g.add(screw);}));
  for(let a=0;a<8;a++)box(g,1.2,38,.5,-33+a*9,0,-6.1,rubber);
  return g;
@@ -62,13 +83,16 @@ function makeScreen(x,index){const g=new THREE.Group();g.position.x=x;product.ad
 [-242,0,242].forEach(makeScreen);
 function label(parent,text,pos,color='#becbd0',size=15){const c=document.createElement('canvas');c.width=512;c.height=96;const ctx=c.getContext('2d');ctx.font='500 34px Segoe UI, Microsoft YaHei';ctx.textAlign='center';ctx.fillStyle=color;ctx.fillText(text,256,59);const tex=new THREE.CanvasTexture(c);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false}));s.position.set(...pos);s.scale.set(size*5.3,size,1);parent.add(s);return s;}
 function dim(parent,a,b,text,pos){const geo=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...a),new THREE.Vector3(...b)]);parent.add(new THREE.Line(geo,new THREE.LineBasicMaterial({color:0x768b95,transparent:true,opacity:.7})));label(parent,text,pos,'#a8bec8',16);}
-const dimensions=new THREE.Group();product.add(dimensions);dim(dimensions,[-362,-120,30],[-122,-120,30],'240 mm',[-242,-138,30]);dim(dimensions,[-395,-60,20],[-395,60,20],'120 mm',[-441,0,20]);
+const dimensions=new THREE.Group();product.add(dimensions);dim(dimensions,[-362,-120,30],[-122,-120,30],'240 mm',[-242,-138,30]);dim(dimensions,[-395,-44,20],[-395,76,20],'120 mm',[-441,16,20]);
 // Actual open C profile and retained T shoe, magnified in the cutaway view.
 makeRail(section,130,mat(0xc1894f,.7,.3));box(section,110,10,65,0,-83,-12,baseMat,2);box(section,104,4,61,0,-90,-12,rubber,1);box(section,90,37,8,0,-105,-40,baseMat,2);
-box(section,90,75,12,20,-22.5,0,black);box(section,87,69,1,21.5,-22.5,6.2,glassMat);
-box(section,55,5,20,37.5,-70,0,mat(0x65cdcc,.55,.3));box(section,40,10,10,45,-62.5,0,mat(0x65cdcc,.55,.3));
-label(section,'屏幕模组 / 12 mm',[0,31,6],'#c6d4d9',9);label(section,'C 形滑轨',[0,-52,39],'#ffc58a',8);label(section,'安装基座',[0,-117,11],'#a8bdc8',8);
-dim(section,[78,-78,-15],[78,-60,-15],'18 mm',[95,-69,-15]);
+const sectionScreen=new THREE.Group();section.add(sectionScreen);
+box(sectionScreen,90,75,12,20,-6.5,0,black);box(sectionScreen,87,69,1,21.5,-6.5,6.2,glassMat);
+piercedBlock(sectionScreen,14,11,6,38,-49.5,0,silver);
+const sectionConnector=makeConnector(section,38,55);
+const sectionAnnotations=new THREE.Group();section.add(sectionAnnotations);
+label(sectionAnnotations,'C 轨 + T 滑块',[-28,-67,40],'#ffc58a',8);label(sectionAnnotations,'安装基座',[0,-117,11],'#a8bdc8',8);
+label(sectionAnnotations,'快拆座 / 拔销后上提',[43,-31,20],'#86d3d0',8);
 
 const pixels=document.createElement('canvas');pixels.width=144;pixels.height=24;const px=pixels.getContext('2d',{willReadFrequently:true});
 function heart(x,y,s=1,color='#ff9d54'){px.fillStyle=color;['0110110','1111111','1111111','0111110','0011100','0001000'].forEach((row,yy)=>[...row].forEach((v,xx)=>{if(v==='1')px.fillRect(x+xx*s,y+yy*s,s,s);}));}
@@ -94,27 +118,30 @@ function drawPixels(t){px.clearRect(0,0,144,24);px.fillStyle='#030606';px.fillRe
   if(lit){ctx.fillStyle=`rgba(255,235,196,.35)`;ctx.beginPath();ctx.arc(x*16+7,y*16+7,1.1,0,Math.PI*2);ctx.fill();}
  }tex.needsUpdate=true;});
 }
-const cameraPresets={overall:{pos:[770,380,1470],target:[0,5,0]},section:{pos:[180,23,202],target:[0,-53,0]},close:{pos:[420,125,820],target:[0,-1,0]},slide:{pos:[1100,420,2150],target:[390,5,0]}};
+const cameraPresets={overall:{pos:[770,380,1470],target:[0,5,0]},section:{pos:[208,80,289],target:[0,-5,0]},close:{pos:[420,125,820],target:[0,-1,0]},slide:{pos:[1100,420,2150],target:[390,5,0]}};
 let cameraTween=null;
 function setCamera(name,immediate=false){const p=cameraPresets[name];const mobile=stage.clientWidth<600&&name!=='section';const dest=new THREE.Vector3(...p.pos);if(mobile)dest.sub(new THREE.Vector3(...p.target)).multiplyScalar(1.28).add(new THREE.Vector3(...p.target));if(immediate){camera.position.copy(dest);controls.target.set(...p.target);controls.update();cameraTween=null;}else cameraTween={from:camera.position.clone(),to:dest,a:controls.target.clone(),b:new THREE.Vector3(...p.target),start:performance.now()};}
 controls.addEventListener('start',()=>cameraTween=null);
-function setView(v){state.view=v;section.visible=v==='section';product.visible=v!=='section';environment.visible=v==='overall';dimensions.visible=v==='overall';setCamera(v);$$('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===v));$('.section-legend').hidden=v!=='section';$('#view-note').innerHTML=v==='section'?'<b>滑动与限位，藏在截面里。</b><span>轨道端部剖切示意 · T 形滑块由顶部窄口保持</span>':v==='close'?'<b>每一颗像素，都在发光。</b><span>48 × 24 点阵 / 单屏 · 4.75 mm 像素间距</span>':'<b>三屏，一幅画面。</b><span>2 mm 物理接缝 · 共用 144 × 24 像素画布</span>';}
+function setView(v){state.view=v;stage.classList.toggle('section-stage',v==='section');section.visible=v==='section';product.visible=v!=='section';environment.visible=v==='overall';dimensions.visible=v==='overall';setCamera(v);$$('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===v));$('.section-legend').hidden=v!=='section';$('#view-note').innerHTML=v==='section'?'<b>拔出锁销，屏幕向上取下。</b><span>银色插舌连接屏幕 · 青色快拆座与 T 滑块留在轨道</span>':v==='close'?'<b>每一颗像素，都在发光。</b><span>48 × 24 点阵 / 单屏 · 4.75 mm 像素间距</span>':'<b>三屏，一幅画面。</b><span>2 mm 物理接缝 · 共用 144 × 24 像素画布</span>';}
 $$('[data-view]').forEach(b=>b.onclick=()=>setView(b.dataset.view));
-function setAction(a){state.action=a;state.time=0;state.paused=false;updatePause();$$('[data-action]').forEach(b=>b.classList.toggle('active',b.dataset.action===a));if(a==='slide'){setView('overall');setCamera('slide');}else if(state.view==='section')setView('overall');$('#status').textContent={light:'点阵已点亮 · 当前内容循环播放',slide:'12 秒循环 · 从右端滑入，再沿轨道滑出',join:'12 秒循环 · 收拢三屏，跨屏内容同步播放'}[a];}
+function setAction(a){state.action=a;state.time=0;state.paused=false;updatePause();$$('[data-action]').forEach(b=>b.classList.toggle('active',b.dataset.action===a));if(a==='detach')setView('section');else if(a==='slide'){setView('overall');setCamera('slide');}else if(state.view==='section')setView('overall');motion(0);$('#status').textContent={light:'点阵已点亮 · 当前内容循环播放',slide:'12 秒循环 · 从右端滑入，再沿轨道滑出',join:'12 秒循环 · 收拢三屏，跨屏内容同步播放',detach:'12 秒循环 · 拔销 → 上提 → 回装 → 锁定'}[a];}
 $$('[data-action]').forEach(b=>b.onclick=()=>setAction(b.dataset.action));
 $$('[data-pattern]').forEach(b=>b.onclick=()=>{state.pattern=b.dataset.pattern;state.time=0;$$('[data-pattern]').forEach(n=>n.classList.toggle('active',n===b));$('.text-input').hidden=state.pattern!=='text';drawPixels(0);});
 function updatePause(){$('#pause').textContent=state.paused?'▶':'Ⅱ';$('#pause').setAttribute('aria-label',state.paused?'播放动画':'暂停动画');}
 $('#pause').onclick=()=>{state.paused=!state.paused;updatePause();};
-$('#timeline').oninput=e=>{state.time=Number(e.target.value)/1000*12;drawPixels(state.time);};
+$('#timeline').oninput=e=>{state.time=Number(e.target.value)/1000*12;motion(state.time);drawPixels(state.time);};
 $('#brightness').oninput=e=>{state.brightness=Number(e.target.value)/100;$('#brightness-value').value=e.target.value+'%';};
 $('#message').oninput=e=>{state.message=e.target.value||' ';drawPixels(state.time);};
 $('#reset').onclick=()=>setCamera(state.action==='slide'&&state.view==='overall'?'slide':state.view);
 $('#capture').onclick=()=>{composer.render();const a=document.createElement('a');a.download=`pixel-rail-${state.view}.png`;a.href=renderer.domElement.toDataURL('image/png');a.click();};
 $('#open-render').onclick=()=>$('#render-dialog').showModal();$('#close-render').onclick=()=>$('#render-dialog').close();$('#render-dialog').onclick=e=>{if(e.target===$('#render-dialog'))$('#render-dialog').close();};
 const ease=x=>{x=THREE.MathUtils.clamp(x,0,1);return x*x*(3-2*x);};
-function motion(t){let phase=t%12;screenGroups.forEach((g,i)=>{let offset=0;if(state.action==='slide'){const enter=ease((phase-i*.65)/2.7),leave=ease((phase-7-(2-i)*.65)/2.7);offset=(1-enter+leave)*1160;}else if(state.action==='join'){const spread=1-ease((phase-1)/3)+ease((phase-8)/3);offset=(i-1)*78*spread;}g.position.x=(i-1)*242+offset;});screenLights.forEach(m=>{m.emissiveIntensity=state.brightness*2.2*(state.action==='light'?(.2+.8*ease(phase/.9)):1);});}
-function resize(){const w=stage.clientWidth,h=stage.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);composer.setSize(w,h);}
+function detachProgress(t){const phase=((t%12)+12)%12;return {pin:ease((phase-.6)/1.4)*(1-ease((phase-9.5)/1.5)),lift:ease((phase-2.2)/2)*(1-ease((phase-6.8)/2)),phase};}
+function motion(t){let phase=t%12;const d=state.action==='detach'?detachProgress(t):{pin:0,lift:0};screenGroups.forEach((g,i)=>{let offset=0;if(state.action==='slide'){const enter=ease((phase-i*.65)/2.7),leave=ease((phase-7-(2-i)*.65)/2.7);offset=(1-enter+leave)*1160;}else if(state.action==='join'){const spread=1-ease((phase-1)/3)+ease((phase-8)/3);offset=(i-1)*78*spread;}g.position.x=(i-1)*242+offset;g.position.y=16+95*d.lift;carriages[i].position.x=g.position.x;});lockPins.forEach(p=>p.position.z=30*d.pin);sectionConnector.pin.position.z=30*d.pin;sectionScreen.position.y=65*d.lift;
+ $('#detach-guide').hidden=state.action!=='detach';if(state.action==='detach'){const step=phase<.6||phase>=11?'locked':phase<2.2?'unlock':phase<6.8?'lift':phase<9.5?'seat':'lock';$$('[data-step]').forEach(el=>el.classList.toggle('active',el.dataset.step===step));const texts={locked:'已锁定 · 插舌落座，锁销穿过连接孔',unlock:'① 向车内拔出两枚锁销，解除屏幕连接',lift:'② 向上提起屏幕；快拆座与 T 滑块留在轨道',seat:'③ 将屏幕插舌向下对准快拆座，回落到底',lock:'④ 插回两枚锁销，重新连接屏幕与滑块'};$('#detach-status').textContent=texts[step];}
+ screenLights.forEach(m=>{m.emissiveIntensity=state.brightness*2.2*(state.action==='light'?(.2+.8*ease(phase/.9)):1);});}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;sectionAnnotations.visible=w>=600;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);composer.setSize(w,h);}
 new ResizeObserver(resize).observe(stage);resize();setCamera('overall',true);drawPixels(0);let prev=performance.now(),lastPixel=-1;
 function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-prev)/1000,.05);prev=now;if(!state.paused)state.time+=dt;if(cameraTween){const f=ease((now-cameraTween.start)/850);camera.position.lerpVectors(cameraTween.from,cameraTween.to,f);controls.target.lerpVectors(cameraTween.a,cameraTween.b,f);if(f>=1)cameraTween=null;}motion(state.time);if(Math.floor(state.time*12)!==lastPixel){drawPixels(state.time);lastPixel=Math.floor(state.time*12);}controls.update();composer.render();$('#timeline').value=((state.time%12)/12*1000).toFixed(0);$('#time-label').textContent='00:'+String(Math.floor(state.time%12)).padStart(2,'0');}
 requestAnimationFrame(animate);
-window.pixelRail={state,setView,setAction,setCamera,camera,controls,renderer,scene,screenGroups,screenMaps,renderAt(t){state.time=t;state.paused=true;motion(t);drawPixels(t);controls.update();composer.render();},getMetrics(){return {screenCenters:screenGroups.map(g=>g.position.x),dimensions:[240,120,12],railLength:1120,pixels:[144,24],view:state.view,pattern:state.pattern,action:state.action,camera:camera.position.toArray()};}};
+window.pixelRail={state,setView,setAction,setCamera,camera,controls,renderer,scene,screenGroups,screenMaps,renderAt(t){state.time=t;state.paused=true;updatePause();motion(t);drawPixels(t);controls.update();composer.render();},getMetrics(){return {screenCenters:screenGroups.map(g=>g.position.x),screenHeights:screenGroups.map(g=>g.position.y),carriageCenters:carriages.map(g=>g.position.x),pinTravel:lockPins.map(p=>p.position.z),sectionLift:sectionScreen.position.y,sectionPinTravel:sectionConnector.pin.position.z,dimensions:[240,120,12],railLength:1120,pixels:[144,24],view:state.view,pattern:state.pattern,action:state.action,camera:camera.position.toArray()};}};
